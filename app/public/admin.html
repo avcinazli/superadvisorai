@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supervisor Admin — AI Engineer</title>
+<meta name="description" content="AI Engineer Supervisor Yönetim Paneli">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2300d084'/><text y='22' x='5' font-size='18' font-family='monospace' fill='white'>S</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:        #0b0f17;
+  --surface:   #111827;
+  --raised:    #1a2234;
+  --border:    rgba(255,255,255,0.08);
+  --border-em: rgba(0,208,132,0.3);
+  --accent:    #00d084;
+  --accent-dim:rgba(0,208,132,0.12);
+  --accent-mid:rgba(0,208,132,0.25);
+  --red:       #f87171;
+  --red-dim:   rgba(248,113,113,0.12);
+  --amber:     #fbbf24;
+  --amber-dim: rgba(251,191,36,0.12);
+  --blue:      #60a5fa;
+  --blue-dim:  rgba(96,165,250,0.12);
+  --text:      #e2e8f0;
+  --muted:     #64748b;
+  --muted2:    #94a3b8;
+  --sidebar-w: 240px;
+  --radius:    10px;
+  --radius-sm: 6px;
+  --shadow:    0 1px 3px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.3);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.5),0 20px 60px rgba(0,0,0,0.4);
+}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;overflow-x:hidden}
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+/* ── UTILS ── */
+.hidden{display:none!important}
+.flex{display:flex}
+.items-center{align-items:center}
+.gap-2{gap:8px}
+.gap-3{gap:12px}
+.gap-4{gap:16px}
+.ml-auto{margin-left:auto}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s,background .15s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:#0b0f17}
+.btn-primary:hover{opacity:.9}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--raised);color:var(--text)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.btn-danger:hover{background:rgba(248,113,113,0.2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-icon{padding:7px;border-radius:var(--radius-sm)}
+/* ── FORMS ── */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:13px;transition:border-color .15s,box-shadow .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.03em}
+.badge-green {background:var(--accent-dim);color:var(--accent)}
+.badge-red   {background:var(--red-dim);color:var(--red)}
+.badge-amber {background:var(--amber-dim);color:var(--amber)}
+.badge-blue  {background:var(--blue-dim);color:var(--blue)}
+.badge-gray  {background:rgba(100,116,139,0.15);color:var(--muted2)}
+/* ── AUTH SCREEN ── */
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+#auth-screen::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,208,132,0.06) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none}
+#auth-screen::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(96,165,250,0.05) 0%,transparent 70%);bottom:-100px;left:-100px;pointer-events:none}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px 40px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);position:relative;z-index:1}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.auth-logo-icon{width:40px;height:40px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;color:#0b0f17}
+.auth-logo-text{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;letter-spacing:-.02em}
+.auth-logo-text span{color:var(--accent)}
+.auth-title{font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:700;letter-spacing:-.03em;margin-bottom:8px}
+.auth-sub{color:var(--muted);font-size:13px;margin-bottom:32px}
+.auth-error{background:var(--red-dim);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--red);font-size:13px;margin-bottom:16px}
+/* ── LAYOUT ── */
+#app{display:flex;min-height:100vh}
+/* ── SIDEBAR ── */
+#sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sidebar-logo-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;color:#0b0f17;flex-shrink:0}
+.sidebar-logo-text{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-.02em;line-height:1.2}
+.sidebar-logo-sub{font-size:10px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto}
+.nav-section{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:12px 12px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;color:var(--muted2);font-size:13px;font-weight:500;transition:all .15s;position:relative;text-decoration:none;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--raised);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent)}
+.nav-item svg{flex-shrink:0;opacity:.7}
+.nav-item.active svg{opacity:1}
+.sidebar-footer{padding:16px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--radius-sm);background:var(--raised)}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-mid);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:12px;font-weight:600;truncate}
+.user-role{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.logout-btn{padding:5px;border-radius:var(--radius-sm);background:none;border:none;color:var(--muted);cursor:pointer;transition:color .15s}
+.logout-btn:hover{color:var(--red)}
+/* ── MAIN ── */
+#main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-height:100vh}
+/* ── TOPBAR ── */
+#topbar{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;letter-spacing:-.02em}
+.topbar-breadcrumb{font-size:12px;color:var(--muted)}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--raised);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;flex:1;max-width:300px}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:13px;width:100%}
+.search-box input::placeholder{color:var(--muted)}
+/* ── CONTENT ── */
+#content{flex:1;padding:24px;overflow-y:auto}
+.view{display:none}
+.view.active{display:block}
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.03em}
+.page-sub{font-size:13px;color:var(--muted);margin-top:2px}
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:border-color .2s,transform .15s}
+.kpi-card:hover{border-color:rgba(255,255,255,0.15);transform:translateY(-1px)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi-card.green::before{background:var(--accent)}
+.kpi-card.blue::before{background:var(--blue)}
+.kpi-card.amber::before{background:var(--amber)}
+.kpi-card.red::before{background:var(--red)}
+.kpi-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.kpi-value{font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.kpi-sub{font-size:12px;color:var(--muted);margin-top:6px}
+.kpi-icon{position:absolute;top:16px;right:16px;opacity:.15;font-size:28px}
+/* ── CHARTS ── */
+.charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+@media(max-width:900px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.chart-title{font-size:13px;font-weight:600;color:var(--muted2);margin-bottom:16px;letter-spacing:.02em}
+.chart-wrap{position:relative;height:220px}
+/* ── TABLE ── */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-bar input,.filter-bar select{background:var(--raised);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;color:var(--text);font-family:inherit;font-size:12px;outline:none;transition:border-color .15s}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent)}
+.filter-bar input{width:220px}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--muted2)}
+thead th.sort-asc::after{content:' ↑'}
+thead th.sort-desc::after{content:' ↓'}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--raised)}
+tbody td{padding:12px 16px;font-size:13px;white-space:nowrap}
+.table-footer{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.pagination{display:flex;align-items:center;gap:4px}
+.page-btn{padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:none;color:var(--muted2);cursor:pointer;font-family:inherit;font-size:12px;transition:all .15s}
+.page-btn:hover{background:var(--raised);color:var(--text)}
+.page-btn.active{background:var(--accent-dim);border-color:var(--accent-mid);color:var(--accent)}
+.page-btn:disabled{opacity:.3;cursor:default}
+/* ── ACTIONS ── */
+.actions{display:flex;gap:6px}
+/* ── MODAL ── */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+#modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.93) translateY(-10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
+.modal-title{font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.02em}
+.modal-close{padding:6px;border-radius:var(--radius-sm);border:none;background:none;color:var(--muted);cursor:pointer;transition:color .15s}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:24px}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border)}
+/* ── CONFIRM ── */
+.confirm-modal{max-width:400px}
+.confirm-text{color:var(--muted2);font-size:13px;line-height:1.6}
+.confirm-name{font-weight:600;color:var(--text)}
+/* ── TOAST ── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:2000;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--raised);box-shadow:var(--shadow);font-size:13px;animation:toastIn .25s cubic-bezier(.34,1.56,.64,1);min-width:260px;max-width:360px}
+.toast.success{border-color:rgba(0,208,132,0.3);background:rgba(0,208,132,0.08)}
+.toast.error  {border-color:rgba(248,113,113,0.3);background:rgba(248,113,113,0.08)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+/* ── TEMPLATES GRID ── */
+.templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.template-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s,transform .15s}
+.template-card:hover{border-color:rgba(255,255,255,0.15);transform:translateY(-2px)}
+.template-category{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.template-name{font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.template-desc{font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:14px}
+.template-stack{font-size:11px;color:var(--muted);background:var(--raised);border-radius:var(--radius-sm);padding:6px 10px;margin-bottom:12px;line-height:1.5}
+.template-process{font-size:11px;color:var(--muted2);white-space:pre-line;line-height:1.8}
+.template-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.template-uses{font-size:11px;color:var(--muted)}
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.3}
+.empty-title{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:600;color:var(--muted2);margin-bottom:6px}
+.empty-sub{font-size:13px;line-height:1.6}
+/* ── LOADING ── */
+.skeleton{background:linear-gradient(90deg,var(--raised) 25%,rgba(255,255,255,0.04) 50%,var(--raised) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-sm)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* ── AUDIT ── */
+.audit-action{font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.03em}
+.action-login   {background:var(--accent-dim);color:var(--accent)}
+.action-logout  {background:rgba(100,116,139,0.15);color:var(--muted2)}
+.action-create  {background:var(--blue-dim);color:var(--blue)}
+.action-update  {background:var(--amber-dim);color:var(--amber)}
+.action-delete  {background:var(--red-dim);color:var(--red)}
+/* ── MOBILE ── */
+.menu-toggle{display:none;padding:8px;border:none;background:none;color:var(--text);cursor:pointer;border-radius:var(--radius-sm)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99}
+@media(max-width:768px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #main{margin-left:0}
+  .menu-toggle{display:flex}
+  .sidebar-overlay.show{display:block}
+  .form-row{grid-template-columns:1fr}
+  .charts-grid{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .filter-bar input{width:160px}
+}
+@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+/* ── RECENT TABLE ── */
+.recent-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:900px){.recent-grid{grid-template-columns:1fr}}
+.section-title{font-size:13px;font-weight:600;color:var(--muted2);margin-bottom:12px;letter-spacing:.02em}
+/* ── PIPELINE / KANBAN ── */
+.kanban-board{display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;align-items:flex-start}
+.kanban-col{flex:0 0 220px;min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);display:flex;flex-direction:column;max-height:calc(100vh - 200px)}
+.kanban-col-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.kanban-col-title{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.kanban-col-count{font-size:11px;color:var(--muted);background:var(--raised);padding:1px 7px;border-radius:10px}
+.kanban-cards{flex:1;padding:8px;display:flex;flex-direction:column;gap:7px;overflow-y:auto}
+.kanban-card{background:var(--raised);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;transition:border-color .15s,transform .1s}
+.kanban-card:hover{border-color:rgba(255,255,255,0.2);transform:translateY(-1px)}
+.kanban-card-title{font-size:12px;font-weight:600;margin-bottom:5px;line-height:1.4}
+.kanban-card-meta{font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+/* ── VIEW TOGGLE ── */
+.view-toggle{display:flex;background:var(--raised);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.view-toggle-btn{padding:6px 12px;border:none;background:none;color:var(--muted2);cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:5px}
+.view-toggle-btn.active{background:var(--accent-dim);color:var(--accent)}
+/* ── NOTES PANEL ── */
+.notes-panel{background:var(--raised);border-radius:var(--radius-sm);padding:12px}
+.note-add{display:flex;gap:8px;margin-bottom:12px}
+.note-add textarea{flex:1;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:13px;resize:none;height:56px;transition:border-color .15s}
+.note-add textarea:focus{outline:none;border-color:var(--accent)}
+.note-item{padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:7px}
+.note-content{font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.note-meta{font-size:11px;color:var(--muted);margin-top:5px;display:flex;align-items:center;justify-content:space-between}
+/* ── TASKS KANBAN ── */
+.task-board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1100px){.task-board{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.task-board{grid-template-columns:1fr}}
+.task-col{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.task-col-header{padding:11px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--muted2);letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+.task-col-body{padding:8px;display:flex;flex-direction:column;gap:6px;min-height:80px}
+.task-item{background:var(--raised);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;transition:border-color .15s}
+.task-item:hover{border-color:rgba(255,255,255,0.2)}
+.task-title{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:4px}
+.task-detail{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* ── PAYMENT KPI ── */
+.pay-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:600px){.pay-kpi{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ─── AUTH SCREEN ──────────────────────────────────────────────────────── -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">S</div>
+      <div>
+        <div class="auth-logo-text">Super<span>visor</span></div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">AI Engineer Panel</div>
+      </div>
+    </div>
+    <div class="auth-title">Hoş Geldiniz</div>
+    <div class="auth-sub">Devam etmek için giriş yapın</div>
+    <div id="auth-error" class="auth-error hidden"></div>
+    <form id="login-form">
+      <div class="form-group">
+        <label>E-posta</label>
+        <input type="email" id="login-email" placeholder="admin@supervisor.io" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Şifre</label>
+        <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px" id="login-btn">
+        Giriş Yap
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ─── SIDEBAR OVERLAY (mobile) ─────────────────────────────────────────── -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- ─── MAIN APP ─────────────────────────────────────────────────────────── -->
+<div id="app" class="hidden">
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">S</div>
+      <div>
+        <div class="sidebar-logo-text">Supervisor</div>
+        <div class="sidebar-logo-sub">Admin Panel</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">Genel</div>
+      <button class="nav-item" data-view="dashboard">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <div class="nav-section">Yönetim</div>
+      <button class="nav-item" data-view="clients">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Müşteriler
+      </button>
+      <button class="nav-item" data-view="projects">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Projeler
+      </button>
+      <button class="nav-item" data-view="templates">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Şablonlar
+      </button>
+      <button class="nav-item" data-view="proposals">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Teklifler
+      </button>
+      <button class="nav-item" data-view="payments">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Ödemeler
+      </button>
+      <button class="nav-item" data-view="tasks">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="3" cy="18" r="1"/></svg>
+        Görevler
+      </button>
+      <div class="nav-section admin-only">Sistem</div>
+      <button class="nav-item admin-only" data-view="users">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+        Kullanıcılar
+      </button>
+      <button class="nav-item admin-editor-only" data-view="audit">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Denetim Kaydı
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name truncate" id="user-name-display">Admin</div>
+          <div class="user-role" id="user-role-display">admin</div>
+        </div>
+        <button class="logout-btn" id="logout-btn" title="Çıkış Yap">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div id="main">
+    <!-- TOPBAR -->
+    <header id="topbar">
+      <button class="menu-toggle" id="menu-toggle">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div id="content">
+
+      <!-- ── DASHBOARD ── -->
+      <section id="view-dashboard" class="view">
+        <div class="kpi-grid" id="kpi-grid">
+          <div class="kpi-card green skeleton" style="height:100px"></div>
+          <div class="kpi-card blue skeleton" style="height:100px"></div>
+          <div class="kpi-card amber skeleton" style="height:100px"></div>
+          <div class="kpi-card red skeleton" style="height:100px"></div>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-title">Aylık Proje Akışı (Son 6 Ay)</div>
+            <div class="chart-wrap"><canvas id="chart-monthly"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Şablona Göre Dağılım</div>
+            <div class="chart-wrap"><canvas id="chart-templates"></canvas></div>
+          </div>
+        </div>
+        <div class="recent-grid">
+          <div class="table-card">
+            <div class="table-header"><div class="section-title">Son Projeler</div></div>
+            <table><thead><tr><th>Proje</th><th>Durum</th><th>Müşteri</th></tr></thead>
+            <tbody id="recent-projects-body"><tr><td colspan="3" class="empty-state"><div class="skeleton" style="height:12px;margin:8px 0"></div></td></tr></tbody>
+            </table>
+          </div>
+          <div class="table-card">
+            <div class="table-header"><div class="section-title">Son Aktiviteler</div></div>
+            <table><thead><tr><th>Kullanıcı</th><th>İşlem</th><th>Zaman</th></tr></thead>
+            <tbody id="recent-audit-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── CLIENTS ── -->
+      <section id="view-clients" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Müşteriler</div><div class="page-sub">Müşteri listesi ve yönetimi</div></div>
+          <div class="flex gap-2">
+            <button class="btn btn-ghost btn-sm" id="btn-export-clients">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              CSV
+            </button>
+            <button class="btn btn-primary editor-action" id="btn-add-client">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Müşteri Ekle
+            </button>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div class="filter-bar">
+              <input type="text" id="client-search" placeholder="İsim, e-posta, şirket...">
+              <select id="client-status-filter">
+                <option value="">Tüm Durumlar</option>
+                <option value="active">Aktif</option>
+                <option value="prospect">Aday</option>
+                <option value="inactive">Pasif</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th data-sort="name">Ad Soyad</th>
+                  <th data-sort="email">E-posta</th>
+                  <th>Şirket</th>
+                  <th>Durum</th>
+                  <th>Projeler</th>
+                  <th data-sort="created_at">Eklenme</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="clients-tbody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="clients-info">Yükleniyor...</span>
+            <div class="pagination" id="clients-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PROJECTS ── -->
+      <section id="view-projects" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Projeler</div><div class="page-sub">Site üretim projeleri</div></div>
+          <div class="flex gap-2">
+            <div class="view-toggle">
+              <button class="view-toggle-btn active" id="proj-list-btn" onclick="setProjView('list')">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Liste
+              </button>
+              <button class="view-toggle-btn" id="proj-kanban-btn" onclick="setProjView('kanban')">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18"/><rect x="10" y="3" width="5" height="11"/><rect x="17" y="3" width="5" height="14"/></svg>
+                Pipeline
+              </button>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="btn-export-projects">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              CSV
+            </button>
+            <button class="btn btn-primary editor-action" id="btn-add-project">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Proje Ekle
+            </button>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div class="filter-bar">
+              <input type="text" id="project-search" placeholder="Proje adı, müşteri...">
+              <select id="project-status-filter">
+                <option value="">Tüm Durumlar</option>
+                <option value="planning">Planlama</option>
+                <option value="in_progress">Devam Ediyor</option>
+                <option value="review">İnceleme</option>
+                <option value="completed">Tamamlandı</option>
+                <option value="paused">Duraklatıldı</option>
+                <option value="cancelled">İptal</option>
+              </select>
+              <select id="project-priority-filter">
+                <option value="">Tüm Öncelikler</option>
+                <option value="urgent">Acil</option>
+                <option value="high">Yüksek</option>
+                <option value="medium">Orta</option>
+                <option value="low">Düşük</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th data-sort="title">Başlık</th>
+                  <th>Müşteri</th>
+                  <th>Şablon</th>
+                  <th>Durum</th>
+                  <th>Öncelik</th>
+                  <th>Son Tarih</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="projects-tbody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="projects-info">Yükleniyor...</span>
+            <div class="pagination" id="projects-pagination"></div>
+          </div>
+        </div>
+        <!-- PIPELINE VIEW -->
+        <div id="pipeline-board" class="hidden" style="margin-top:4px">
+          <div class="kanban-board" id="kanban-board-inner"></div>
+        </div>
+      </section>
+
+      <!-- ── PROPOSALS ── -->
+      <section id="view-proposals" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Teklifler</div><div class="page-sub">Müşteri teklifleri ve durumları</div></div>
+          <button class="btn btn-primary editor-action" id="btn-add-proposal">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Teklif Ekle
+          </button>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div class="filter-bar">
+              <input type="text" id="proposal-search" placeholder="Başlık, müşteri...">
+              <select id="proposal-status-filter">
+                <option value="">Tüm Durumlar</option>
+                <option value="draft">Taslak</option>
+                <option value="sent">Gönderildi</option>
+                <option value="viewed">Görüntülendi</option>
+                <option value="accepted">Kabul Edildi</option>
+                <option value="rejected">Reddedildi</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Başlık</th><th>Müşteri</th><th>Tutar</th><th>Durum</th><th>Geçerlilik</th><th>Oluşturulma</th><th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="proposals-tbody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="proposals-info"></span>
+            <div class="pagination" id="proposals-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PAYMENTS ── -->
+      <section id="view-payments" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Ödemeler</div><div class="page-sub">Fatura ve ödeme takibi</div></div>
+          <button class="btn btn-primary editor-action" id="btn-add-payment">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ödeme Ekle
+          </button>
+        </div>
+        <div class="pay-kpi" id="pay-kpi-grid"></div>
+        <div class="table-card">
+          <div class="table-header">
+            <div class="filter-bar">
+              <select id="payment-status-filter">
+                <option value="">Tüm Durumlar</option>
+                <option value="pending">Bekliyor</option>
+                <option value="paid">Ödendi</option>
+                <option value="overdue">Gecikti</option>
+                <option value="cancelled">İptal</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Başlık</th><th>Müşteri</th><th>Proje</th><th>Tutar</th><th>Durum</th><th>Son Ödeme</th><th>Fatura No</th><th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="payments-tbody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="payments-info"></span>
+            <div class="pagination" id="payments-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TASKS ── -->
+      <section id="view-tasks" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Görevler</div><div class="page-sub">Proje bazlı görev takibi</div></div>
+          <div class="flex gap-2">
+            <select id="task-project-filter" class="btn btn-ghost btn-sm" style="padding:6px 10px;cursor:pointer">
+              <option value="">Tüm Projeler</option>
+            </select>
+            <button class="btn btn-primary editor-action" id="btn-add-task">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Görev Ekle
+            </button>
+          </div>
+        </div>
+        <div class="task-board" id="task-board"></div>
+      </section>
+
+      <!-- ── TEMPLATES ── -->
+      <section id="view-templates" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Şablonlar</div><div class="page-sub">10 site üretim playbook'u</div></div>
+        </div>
+        <div class="templates-grid" id="templates-grid"></div>
+      </section>
+
+      <!-- ── USERS ── -->
+      <section id="view-users" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Kullanıcılar</div><div class="page-sub">Sistem kullanıcı yönetimi</div></div>
+          <button class="btn btn-primary" id="btn-add-user">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Kullanıcı Ekle
+          </button>
+        </div>
+        <div class="table-card">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th>Ad</th><th>E-posta</th><th>Rol</th><th>Durum</th><th>Son Giriş</th><th>İşlem</th></tr>
+              </thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── AUDIT ── -->
+      <section id="view-audit" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Denetim Kaydı</div><div class="page-sub">Sistem aktivite geçmişi</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div class="filter-bar">
+              <select id="audit-action-filter">
+                <option value="">Tüm İşlemler</option>
+                <option value="login">Login</option>
+                <option value="logout">Logout</option>
+                <option value="create">Oluştur</option>
+                <option value="update">Güncelle</option>
+                <option value="delete">Sil</option>
+              </select>
+              <select id="audit-resource-filter">
+                <option value="">Tüm Kaynaklar</option>
+                <option value="auth">Auth</option>
+                <option value="client">Müşteri</option>
+                <option value="project">Proje</option>
+                <option value="proposal">Teklif</option>
+                <option value="payment">Ödeme</option>
+                <option value="user">Kullanıcı</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th>Kullanıcı</th><th>İşlem</th><th>Kaynak</th><th>Ad</th><th>IP</th><th>Zaman</th></tr>
+              </thead>
+              <tbody id="audit-tbody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="audit-info"></span>
+            <div class="pagination" id="audit-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ─── MODAL ─────────────────────────────────────────────────────────────── -->
+<div id="modal-overlay">
+  <div class="modal" id="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Modal</div>
+      <button class="modal-close" id="modal-close">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- ─── TOAST ──────────────────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const State = {
+  user: null,
+  currentView: 'dashboard',
+  clients:   { page:1, limit:20, search:'', status:'', total:0 },
+  projects:  { page:1, limit:20, search:'', status:'', priority:'', total:0, viewMode:'list' },
+  audit:     { page:1, limit:30, action:'', resource_type:'', total:0 },
+  proposals: { page:1, limit:20, search:'', status:'', total:0 },
+  payments:  { page:1, limit:20, status:'', total:0 },
+  tasks:     { project_id:'' },
+  templates: [],
+  allClients: [],
+  allTemplates: [],
+  allUsers: [],
+  charts: {},
+};
+
+// ─── API ─────────────────────────────────────────────────────────────────────
+const API = {
+  async call(method, url, body) {
+    const opts = { method, credentials:'include', headers:{'Content-Type':'application/json'} };
+    if (body) opts.body = JSON.stringify(body);
+    let res;
+    try { res = await fetch(url, opts); }
+    catch { throw new Error('Sunucuya bağlanılamadı. Docker çalışıyor mu?'); }
+    if (res.status === 401) {
+      logout();
+      throw new Error('Oturum süresi doldu, lütfen yeniden giriş yapın');
+    }
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok) throw new Error(data.error || 'Hata oluştu');
+    return data;
+  },
+  get:    (url)       => API.call('GET',    url),
+  post:   (url, body) => API.call('POST',   url, body),
+  put:    (url, body) => API.call('PUT',    url, body),
+  delete: (url)       => API.call('DELETE', url),
+};
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      ${type==='success'
+        ? '<polyline points="20 6 9 17 4 12"/>'
+        : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'}
+    </svg>
+    <span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+const Modal = {
+  open(title, body, footer) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').innerHTML = body;
+    document.getElementById('modal-footer').innerHTML = footer;
+    document.getElementById('modal-overlay').classList.add('open');
+  },
+  close() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  },
+};
+document.getElementById('modal-close').onclick = Modal.close;
+document.getElementById('modal-overlay').onclick = e => { if (e.target.id === 'modal-overlay') Modal.close(); };
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const data = await API.get('/api/auth/me');
+    if (data?.user) loginSuccess(data.user);
+    else showAuth();
+  } catch { showAuth(); }
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').classList.add('hidden');
+}
+
+function loginSuccess(user) {
+  State.user = user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('user-name-display').textContent = user.name;
+  document.getElementById('user-role-display').textContent = ROLE_LABELS[user.role] || user.role;
+  document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+  applyRoleVisibility(user.role);
+  navigate('dashboard');
+}
+
+function applyRoleVisibility(role) {
+  const isAdmin   = role === 'admin';
+  const isEditor  = role === 'admin' || role === 'editor';
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
+  document.querySelectorAll('.admin-editor-only').forEach(el => el.style.display = isEditor ? '' : 'none');
+  document.querySelectorAll('.editor-action').forEach(el => el.style.display = isEditor ? '' : 'none');
+}
+
+async function logout() {
+  // Direct fetch — API.call kullanma, 401 döngüsünü engelle
+  fetch('/api/auth/logout', { method:'POST', credentials:'include' }).catch(()=>{});
+  State.user = null;
+  history.replaceState(null, '', '/admin');
+  showAuth();
+}
+
+document.getElementById('login-form').onsubmit = async e => {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('auth-error');
+  errEl.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Giriş yapılıyor...';
+  try {
+    const data = await API.post('/api/auth/login', {
+      email:    document.getElementById('login-email').value,
+      password: document.getElementById('login-password').value,
+    });
+    if (data?.user) loginSuccess(data.user);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Giriş Yap';
+  }
+};
+document.getElementById('logout-btn').onclick = logout;
+
+// ─── ROUTER ──────────────────────────────────────────────────────────────────
+const VIEW_TITLES = {
+  dashboard: 'Dashboard',
+  clients:   'Müşteriler',
+  projects:  'Projeler',
+  templates: 'Şablonlar',
+  proposals: 'Teklifler',
+  payments:  'Ödemeler',
+  tasks:     'Görevler',
+  users:     'Kullanıcılar',
+  audit:     'Denetim Kaydı',
+};
+
+async function navigate(view) {
+  if (!document.getElementById(`view-${view}`)) return;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(`view-${view}`).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navBtn = document.querySelector(`.nav-item[data-view="${view}"]`);
+  if (navBtn) navBtn.classList.add('active');
+  document.getElementById('topbar-title').textContent = VIEW_TITLES[view] || view;
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+  State.currentView = view;
+  window.location.hash = view;
+
+  const loaders = { dashboard, clients: loadClients, projects: loadProjects, templates: loadTemplates, users: loadUsers, audit: loadAudit, proposals: loadProposals, payments: loadPayments, tasks: loadTasks };
+  if (loaders[view]) await loaders[view]();
+}
+
+document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
+  btn.onclick = () => navigate(btn.dataset.view);
+});
+
+window.addEventListener('hashchange', () => {
+  const h = location.hash.replace('#','');
+  if (VIEW_TITLES[h]) navigate(h);
+});
+
+// Mobile menu
+document.getElementById('menu-toggle').onclick = () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+};
+document.getElementById('sidebar-overlay').onclick = () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const STATUS_LABELS = { active:'Aktif', inactive:'Pasif', prospect:'Aday', planning:'Planlama', in_progress:'Devam Ediyor', review:'İnceleme', completed:'Tamamlandı', paused:'Duraklatıldı', cancelled:'İptal' };
+const STATUS_BADGE  = { active:'green', inactive:'gray', prospect:'blue', planning:'blue', in_progress:'amber', review:'amber', completed:'green', paused:'gray', cancelled:'red' };
+const PRIORITY_BADGE = { urgent:'red', high:'amber', medium:'blue', low:'gray' };
+const PRIORITY_LABELS = { urgent:'Acil', high:'Yüksek', medium:'Orta', low:'Düşük' };
+const ROLE_LABELS = { admin:'Admin', editor:'Editör', viewer:'Görüntüleyici' };
+const CATEGORY_COLORS = { saas:'blue', marketing:'green', content:'amber', ecommerce:'red', tooling:'gray', ux:'gray' };
+
+function badge(text, color) { return `<span class="badge badge-${color||'gray'}">${text}</span>`; }
+function fmt(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('tr-TR', { day:'2-digit', month:'short', year:'numeric' });
+}
+function fmtTime(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('tr-TR',{day:'2-digit',month:'short'}) + ' ' + d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+}
+function escHtml(s) { if (!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function renderPagination(containerId, current, total, limit, onPage) {
+  const totalPages = Math.ceil(total / limit);
+  const el = document.getElementById(containerId);
+  if (totalPages <= 1) { el.innerHTML=''; return; }
+
+  let html = `<button class="page-btn" ${current===1?'disabled':''} onclick="(${onPage})(${current-1})">‹</button>`;
+  for (let p = Math.max(1,current-2); p <= Math.min(totalPages,current+2); p++) {
+    html += `<button class="page-btn ${p===current?'active':''}" onclick="(${onPage})(${p})">${p}</button>`;
+  }
+  html += `<button class="page-btn" ${current===totalPages?'disabled':''} onclick="(${onPage})(${current+1})">›</button>`;
+  el.innerHTML = html;
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+async function dashboard() {
+  try {
+    const d = await API.get('/api/dashboard/stats');
+    if (!d) return;
+
+    document.getElementById('kpi-grid').innerHTML = `
+      <div class="kpi-card green">
+        <div class="kpi-label">Toplam Müşteri</div>
+        <div class="kpi-value">${d.clients.total}</div>
+        <div class="kpi-sub">${d.clients.active} aktif</div>
+        <div class="kpi-icon">👥</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">Toplam Proje</div>
+        <div class="kpi-value">${d.projects.total}</div>
+        <div class="kpi-sub">${d.projects.in_progress} devam ediyor</div>
+        <div class="kpi-icon">🚀</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Tamamlanan</div>
+        <div class="kpi-value">${d.projects.completed}</div>
+        <div class="kpi-sub">toplam projeden</div>
+        <div class="kpi-icon">✅</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">Şablon Sayısı</div>
+        <div class="kpi-value">${d.byTemplate.length || 0}</div>
+        <div class="kpi-sub">aktif şablon tipi</div>
+        <div class="kpi-icon">📄</div>
+      </div>
+    `;
+
+    // Monthly chart
+    setTimeout(() => {
+      const months = d.monthly.map(r => { const [y,m]=r.month.split('-'); return new Date(y,m-1).toLocaleDateString('tr-TR',{month:'short'}); });
+      const counts = d.monthly.map(r => parseInt(r.count));
+      if (State.charts.monthly) State.charts.monthly.destroy();
+      const ctx = document.getElementById('chart-monthly').getContext('2d');
+      State.charts.monthly = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: months, datasets: [{ label:'Proje', data: counts, backgroundColor: 'rgba(0,208,132,0.3)', borderColor: '#00d084', borderWidth: 2, borderRadius: 6 }] },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11}}}, y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11},stepSize:1}} } }
+      });
+
+      // Template pie
+      if (State.charts.tpl) State.charts.tpl.destroy();
+      const ctx2 = document.getElementById('chart-templates').getContext('2d');
+      const COLORS = ['#00d084','#60a5fa','#fbbf24','#f87171','#a78bfa','#34d399'];
+      State.charts.tpl = new Chart(ctx2, {
+        type: 'doughnut',
+        data: { labels: d.byTemplate.map(r=>r.template), datasets: [{ data: d.byTemplate.map(r=>parseInt(r.count)), backgroundColor: COLORS, borderColor: 'transparent', hoverOffset: 6 }] },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{color:'#94a3b8',font:{size:11},padding:12} } } }
+      });
+    }, 100);
+
+    // Recent projects
+    document.getElementById('recent-projects-body').innerHTML = d.recentProjects.length
+      ? d.recentProjects.map(p=>`<tr>
+          <td><span style="font-weight:500">${escHtml(p.title)}</span><br><span style="font-size:11px;color:var(--muted)">${escHtml(p.template_name||'')}</span></td>
+          <td>${badge(STATUS_LABELS[p.status]||p.status, STATUS_BADGE[p.status]||'gray')}</td>
+          <td style="color:var(--muted2)">${escHtml(p.client_name||'—')}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="3"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Henüz proje yok</div></div></td></tr>';
+
+    // Recent audit
+    document.getElementById('recent-audit-body').innerHTML = d.recentAudit.length
+      ? d.recentAudit.map(a=>`<tr>
+          <td style="font-weight:500">${escHtml(a.user_name||'Sistem')}</td>
+          <td><span class="audit-action action-${a.action}">${a.action}</span></td>
+          <td style="color:var(--muted2);font-size:11px">${fmtTime(a.created_at)}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="3" style="color:var(--muted);padding:20px;text-align:center">Aktivite yok</td></tr>';
+
+  } catch (err) { toast(err.message, 'error'); }
+}
+
+// ─── CLIENTS ─────────────────────────────────────────────────────────────────
+let clientSearchTimer;
+document.getElementById('client-search').oninput = e => {
+  clearTimeout(clientSearchTimer);
+  clientSearchTimer = setTimeout(() => { State.clients.search = e.target.value; State.clients.page = 1; loadClients(); }, 300);
+};
+document.getElementById('client-status-filter').onchange = e => { State.clients.status = e.target.value; State.clients.page = 1; loadClients(); };
+document.getElementById('btn-export-clients').onclick = () => window.location.href = '/api/clients/export';
+document.getElementById('btn-add-client').onclick = () => openClientModal();
+
+async function loadClients() {
+  const { page, limit, search, status } = State.clients;
+  const qs = new URLSearchParams({ page, limit, search, status }).toString();
+  try {
+    const data = await API.get(`/api/clients?${qs}`);
+    if (!data) return;
+    State.clients.total = data.total;
+    const tbody = document.getElementById('clients-tbody');
+    tbody.innerHTML = data.data.length
+      ? data.data.map(c=>`<tr>
+          <td><span style="font-weight:500">${escHtml(c.name)}</span></td>
+          <td style="color:var(--muted2)">${escHtml(c.email)}</td>
+          <td style="color:var(--muted2)">${escHtml(c.company||'—')}</td>
+          <td>${badge(STATUS_LABELS[c.status]||c.status, STATUS_BADGE[c.status]||'gray')}</td>
+          <td style="text-align:center">${c.project_count}</td>
+          <td style="color:var(--muted)">${fmt(c.created_at)}</td>
+          <td><div class="actions">
+            <button class="btn btn-ghost btn-sm btn-icon editor-action" onclick="openClientModal(${JSON.stringify(escHtml(JSON.stringify(c))).replace(/"/g,'&quot;')})" title="Düzenle">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-sm btn-icon admin-only" onclick="deleteClient(${c.id},'${escHtml(c.name)}')" title="Sil">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div></td>
+        </tr>`).join('')
+      : '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Müşteri bulunamadı</div></div></td></tr>';
+
+    document.getElementById('clients-info').textContent = `${data.total} müşteri, sayfa ${page}`;
+    applyRoleVisibility(State.user?.role);
+    renderPagination('clients-pagination', page, data.total, limit, p => { State.clients.page=p; loadClients(); });
+  } catch (err) { toast(err.message,'error'); }
+}
+
+function openClientModal(clientJson) {
+  const c = clientJson ? JSON.parse(decodeURIComponent(clientJson)) : null;
+  const title = c ? 'Müşteriyi Düzenle' : 'Yeni Müşteri';
+  Modal.open(title, `
+    <form id="client-form">
+      <div class="form-row">
+        <div class="form-group"><label>Ad Soyad *</label><input name="name" value="${escHtml(c?.name||'')}" required placeholder="Ahmet Yılmaz"></div>
+        <div class="form-group"><label>E-posta *</label><input name="email" type="email" value="${escHtml(c?.email||'')}" required placeholder="ahmet@sirket.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Şirket</label><input name="company" value="${escHtml(c?.company||'')}" placeholder="Şirket adı"></div>
+        <div class="form-group"><label>Telefon</label><input name="phone" value="${escHtml(c?.phone||'')}" placeholder="+90 555 000 00 00"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Durum</label>
+          <select name="status">
+            <option value="active" ${(c?.status||'active')==='active'?'selected':''}>Aktif</option>
+            <option value="prospect" ${c?.status==='prospect'?'selected':''}>Aday</option>
+            <option value="inactive" ${c?.status==='inactive'?'selected':''}>Pasif</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notlar</label><textarea name="notes">${escHtml(c?.notes||'')}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-primary" onclick="submitClientForm(${c?.id||'null'})">Kaydet</button>
+  `);
+}
+
+async function submitClientForm(id) {
+  const form = document.getElementById('client-form');
+  const fd = new FormData(form);
+  const body = Object.fromEntries(fd.entries());
+  try {
+    if (id) await API.put(`/api/clients/${id}`, body);
+    else     await API.post('/api/clients', body);
+    Modal.close();
+    toast(id ? 'Müşteri güncellendi' : 'Müşteri eklendi');
+    loadClients();
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function deleteClient(id, name) {
+  Modal.open('Müşteriyi Sil', `
+    <p class="confirm-text">
+      <span class="confirm-name">${escHtml(name)}</span> adlı müşteriyi silmek istediğinize emin misiniz?
+      Bu işlem geri alınamaz.
+    </p>
+  `, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-danger" onclick="confirmDeleteClient(${id})">Sil</button>
+  `);
+  document.querySelector('.modal').classList.add('confirm-modal');
+}
+
+async function confirmDeleteClient(id) {
+  try {
+    await API.delete(`/api/clients/${id}`);
+    Modal.close();
+    toast('Müşteri silindi');
+    loadClients();
+  } catch (err) { toast(err.message,'error'); }
+}
+
+// ─── PROJECTS ─────────────────────────────────────────────────────────────────
+let projectSearchTimer;
+document.getElementById('project-search').oninput = e => {
+  clearTimeout(projectSearchTimer);
+  projectSearchTimer = setTimeout(() => { State.projects.search = e.target.value; State.projects.page = 1; loadProjects(); }, 300);
+};
+document.getElementById('project-status-filter').onchange = e => { State.projects.status = e.target.value; State.projects.page = 1; loadProjects(); };
+document.getElementById('project-priority-filter').onchange = e => { State.projects.priority = e.target.value; State.projects.page = 1; loadProjects(); };
+document.getElementById('btn-export-projects').onclick = () => window.location.href = '/api/projects/export';
+document.getElementById('btn-add-project').onclick = () => openProjectModal();
+
+async function loadProjects() {
+  const { page, limit, search, status, priority } = State.projects;
+  const qs = new URLSearchParams({ page, limit, search, status, priority }).toString();
+  try {
+    const data = await API.get(`/api/projects?${qs}`);
+    if (!data) return;
+    State.projects.total = data.total;
+    const tbody = document.getElementById('projects-tbody');
+    tbody.innerHTML = data.data.length
+      ? data.data.map(p=>`<tr>
+          <td>
+            <span style="font-weight:500">${escHtml(p.title)}</span>
+            ${p.url ? `<br><a href="${escHtml(p.url)}" target="_blank" style="font-size:11px;color:var(--accent)">🔗 Görüntüle</a>` : ''}
+          </td>
+          <td style="color:var(--muted2)">${escHtml(p.client_name||'—')}</td>
+          <td><span style="font-size:11px;color:var(--muted2)">${escHtml(p.template_name||'—')}</span></td>
+          <td>${badge(STATUS_LABELS[p.status]||p.status, STATUS_BADGE[p.status]||'gray')}</td>
+          <td>${badge(PRIORITY_LABELS[p.priority]||p.priority, PRIORITY_BADGE[p.priority]||'gray')}</td>
+          <td style="color:var(--muted)">${fmt(p.deadline)}</td>
+          <td><div class="actions">
+            <button class="btn btn-ghost btn-sm btn-icon editor-action" onclick="openProjectModal(${JSON.stringify(escHtml(JSON.stringify(p))).replace(/"/g,'&quot;')})" title="Düzenle">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-sm btn-icon admin-only" onclick="deleteProject(${p.id},'${escHtml(p.title)}')" title="Sil">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div></td>
+        </tr>`).join('')
+      : '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🚀</div><div class="empty-title">Proje bulunamadı</div></div></td></tr>';
+
+    document.getElementById('projects-info').textContent = `${data.total} proje, sayfa ${page}`;
+    applyRoleVisibility(State.user?.role);
+    renderPagination('projects-pagination', page, data.total, limit, p => { State.projects.page=p; loadProjects(); });
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function openProjectModal(projectJson) {
+  const p = projectJson ? JSON.parse(decodeURIComponent(projectJson)) : null;
+
+  // load selects
+  const [clientsData, templates, usersData] = await Promise.all([
+    API.get('/api/clients?limit=200'),
+    API.get('/api/templates'),
+    State.user?.role === 'admin' ? API.get('/api/users') : Promise.resolve([]),
+  ]);
+
+  const clientOpts = (clientsData?.data||[]).map(c=>`<option value="${c.id}" ${p?.client_id==c.id?'selected':''}>${escHtml(c.name)}</option>`).join('');
+  const tplOpts    = (templates||[]).map(t=>`<option value="${t.id}" ${p?.template_id==t.id?'selected':''}>${escHtml(t.name)}</option>`).join('');
+  const userOpts   = (usersData||[]).map(u=>`<option value="${u.id}" ${p?.assigned_to==u.id?'selected':''}>${escHtml(u.name)}</option>`).join('');
+
+  Modal.open(p ? 'Projeyi Düzenle' : 'Yeni Proje', `
+    <form id="project-form">
+      <div class="form-group"><label>Proje Başlığı *</label><input name="title" value="${escHtml(p?.title||'')}" required placeholder="Müşteri sitesi v2"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Müşteri</label><select name="client_id"><option value="">— Seçin —</option>${clientOpts}</select></div>
+        <div class="form-group"><label>Şablon</label><select name="template_id"><option value="">— Seçin —</option>${tplOpts}</select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Durum</label>
+          <select name="status">
+            ${['planning','in_progress','review','completed','paused','cancelled'].map(s=>`<option value="${s}" ${(p?.status||'planning')===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><label>Öncelik</label>
+          <select name="priority">
+            ${['urgent','high','medium','low'].map(s=>`<option value="${s}" ${(p?.priority||'medium')===s?'selected':''}>${PRIORITY_LABELS[s]}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Bütçe (₺)</label><input name="budget" type="number" value="${p?.budget||''}" placeholder="0.00"></div>
+        <div class="form-group"><label>Son Tarih</label><input name="deadline" type="date" value="${p?.deadline?p.deadline.split('T')[0]:''}"></div>
+      </div>
+      ${userOpts ? `<div class="form-group"><label>Atanan</label><select name="assigned_to"><option value="">— Seçin —</option>${userOpts}</select></div>` : ''}
+      <div class="form-group"><label>URL</label><input name="url" value="${escHtml(p?.url||'')}" placeholder="https://"></div>
+      <div class="form-group"><label>Açıklama</label><textarea name="description">${escHtml(p?.description||'')}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-primary" onclick="submitProjectForm(${p?.id||'null'})">Kaydet</button>
+  `);
+}
+
+async function submitProjectForm(id) {
+  const form = document.getElementById('project-form');
+  const fd = new FormData(form);
+  const body = Object.fromEntries(fd.entries());
+  try {
+    if (id) await API.put(`/api/projects/${id}`, body);
+    else     await API.post('/api/projects', body);
+    Modal.close();
+    toast(id ? 'Proje güncellendi' : 'Proje eklendi');
+    loadProjects();
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function deleteProject(id, title) {
+  Modal.open('Projeyi Sil', `
+    <p class="confirm-text"><span class="confirm-name">${escHtml(title)}</span> projesini silmek istediğinize emin misiniz?</p>
+  `, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-danger" onclick="confirmDeleteProject(${id})">Sil</button>
+  `);
+}
+async function confirmDeleteProject(id) {
+  try { await API.delete(`/api/projects/${id}`); Modal.close(); toast('Proje silindi'); loadProjects(); }
+  catch (err) { toast(err.message,'error'); }
+}
+
+// ─── TEMPLATES ───────────────────────────────────────────────────────────────
+async function loadTemplates() {
+  try {
+    const data = await API.get('/api/templates');
+    if (!data) return;
+    const CATEGORY_LABEL = { saas:'SaaS', marketing:'Pazarlama', content:'İçerik', ecommerce:'E-ticaret', tooling:'Araç', ux:'UX' };
+    document.getElementById('templates-grid').innerHTML = data.length
+      ? data.map(t=>`
+        <div class="template-card">
+          <div class="template-category">${CATEGORY_LABEL[t.category]||t.category}</div>
+          <div class="template-name">${escHtml(t.name)}</div>
+          <div class="template-desc">${escHtml(t.description||'')}</div>
+          <div class="template-stack">📦 ${escHtml(t.stack||'')}</div>
+          <div class="template-process">${escHtml(t.process||'')}</div>
+          <div class="template-footer">
+            <span class="template-uses">${t.project_count} projede kullanıldı</span>
+            <button class="btn btn-ghost btn-sm editor-action" onclick="quickAddProject(${t.id})">+ Proje Aç</button>
+          </div>
+        </div>`).join('')
+      : '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📄</div><div class="empty-title">Şablon bulunamadı</div></div>';
+    applyRoleVisibility(State.user?.role);
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function quickAddProject(templateId) {
+  await openProjectModal(null);
+  const sel = document.querySelector('#project-form select[name="template_id"]');
+  if (sel) sel.value = templateId;
+}
+
+// ─── USERS ───────────────────────────────────────────────────────────────────
+document.getElementById('btn-add-user').onclick = () => openUserModal();
+
+async function loadUsers() {
+  try {
+    const data = await API.get('/api/users');
+    if (!data) return;
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = data.length
+      ? data.map(u=>`<tr>
+          <td style="font-weight:500">${escHtml(u.name)}</td>
+          <td style="color:var(--muted2)">${escHtml(u.email)}</td>
+          <td>${badge(ROLE_LABELS[u.role]||u.role, u.role==='admin'?'red':u.role==='editor'?'amber':'gray')}</td>
+          <td>${u.is_active ? badge('Aktif','green') : badge('Pasif','gray')}</td>
+          <td style="color:var(--muted)">${u.last_login ? fmtTime(u.last_login) : 'Hiç'}</td>
+          <td><div class="actions">
+            <button class="btn btn-ghost btn-sm btn-icon" onclick="openUserModal(${JSON.stringify(escHtml(JSON.stringify(u))).replace(/"/g,'&quot;')})" title="Düzenle">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="deleteUser(${u.id},'${escHtml(u.name)}')" title="Sil">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div></td>
+        </tr>`).join('')
+      : '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">Kullanıcı bulunamadı</div></div></td></tr>';
+  } catch (err) { toast(err.message,'error'); }
+}
+
+function openUserModal(userJson) {
+  const u = userJson ? JSON.parse(decodeURIComponent(userJson)) : null;
+  Modal.open(u ? 'Kullanıcıyı Düzenle' : 'Yeni Kullanıcı', `
+    <form id="user-form">
+      <div class="form-row">
+        <div class="form-group"><label>Ad *</label><input name="name" value="${escHtml(u?.name||'')}" required placeholder="Ayşe Demir"></div>
+        <div class="form-group"><label>E-posta *</label><input name="email" type="email" value="${escHtml(u?.email||'')}" required placeholder="ayse@firma.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Rol</label>
+          <select name="role">
+            <option value="admin"  ${(u?.role||'viewer')==='admin' ?'selected':''}>Admin</option>
+            <option value="editor" ${u?.role==='editor'?'selected':''}>Editör</option>
+            <option value="viewer" ${(u?.role||'viewer')==='viewer'?'selected':''}>Görüntüleyici</option>
+          </select>
+        </div>
+        ${u ? `<div class="form-group"><label>Durum</label>
+          <select name="is_active">
+            <option value="true"  ${u.is_active?'selected':''}>Aktif</option>
+            <option value="false" ${!u.is_active?'selected':''}>Pasif</option>
+          </select></div>` : ''}
+      </div>
+      <div class="form-group"><label>${u?'Yeni Şifre (boş bırakılırsa değişmez)':'Şifre *'}</label>
+        <input name="password" type="password" ${u?'':'required'} placeholder="Minimum 8 karakter" autocomplete="new-password">
+      </div>
+    </form>
+  `, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-primary" onclick="submitUserForm(${u?.id||'null'})">Kaydet</button>
+  `);
+}
+
+async function submitUserForm(id) {
+  const form = document.getElementById('user-form');
+  const fd = new FormData(form);
+  const body = Object.fromEntries(fd.entries());
+  if (!body.password) delete body.password;
+  if (body.is_active) body.is_active = body.is_active === 'true';
+  try {
+    if (id) await API.put(`/api/users/${id}`, body);
+    else     await API.post('/api/users', body);
+    Modal.close();
+    toast(id ? 'Kullanıcı güncellendi' : 'Kullanıcı eklendi');
+    loadUsers();
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function deleteUser(id, name) {
+  Modal.open('Kullanıcıyı Sil', `
+    <p class="confirm-text"><span class="confirm-name">${escHtml(name)}</span> kullanıcısını silmek istediğinize emin misiniz?</p>
+  `, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-danger" onclick="confirmDeleteUser(${id})">Sil</button>
+  `);
+}
+async function confirmDeleteUser(id) {
+  try { await API.delete(`/api/users/${id}`); Modal.close(); toast('Kullanıcı silindi'); loadUsers(); }
+  catch (err) { toast(err.message,'error'); }
+}
+
+// ─── AUDIT ───────────────────────────────────────────────────────────────────
+document.getElementById('audit-action-filter').onchange   = e => { State.audit.action = e.target.value; State.audit.page = 1; loadAudit(); };
+document.getElementById('audit-resource-filter').onchange = e => { State.audit.resource_type = e.target.value; State.audit.page = 1; loadAudit(); };
+
+async function loadAudit() {
+  const { page, limit, action, resource_type } = State.audit;
+  const qs = new URLSearchParams({ page, limit, action, resource_type }).toString();
+  try {
+    const data = await API.get(`/api/audit?${qs}`);
+    if (!data) return;
+    State.audit.total = data.total;
+    const RESOURCE_LABEL = { auth:'Auth', client:'Müşteri', project:'Proje', proposal:'Teklif', payment:'Ödeme', user:'Kullanıcı' };
+    const tbody = document.getElementById('audit-tbody');
+    tbody.innerHTML = data.data.length
+      ? data.data.map(a=>`<tr>
+          <td style="font-weight:500">${escHtml(a.user_name||'Sistem')}</td>
+          <td><span class="audit-action action-${a.action}">${a.action}</span></td>
+          <td style="color:var(--muted2)">${RESOURCE_LABEL[a.resource_type]||a.resource_type}</td>
+          <td style="color:var(--muted2)">${escHtml(a.resource_name||'—')}</td>
+          <td style="color:var(--muted);font-size:11px">${a.ip_address||'—'}</td>
+          <td style="color:var(--muted);font-size:11px">${fmtTime(a.created_at)}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Kayıt bulunamadı</div></div></td></tr>';
+
+    document.getElementById('audit-info').textContent = `${data.total} kayıt`;
+    renderPagination('audit-pagination', page, data.total, limit, p => { State.audit.page=p; loadAudit(); });
+  } catch (err) { toast(err.message,'error'); }
+}
+
+// ─── PIPELINE ────────────────────────────────────────────────────────────────
+function setProjView(mode) {
+  State.projects.viewMode = mode;
+  document.getElementById('proj-list-btn').classList.toggle('active', mode==='list');
+  document.getElementById('proj-kanban-btn').classList.toggle('active', mode==='kanban');
+  document.querySelector('.table-card', '#view-projects');
+  const tableCard = document.querySelector('#view-projects .table-card');
+  const pipeline  = document.getElementById('pipeline-board');
+  if (mode === 'kanban') {
+    tableCard.classList.add('hidden');
+    pipeline.classList.remove('hidden');
+    loadPipeline();
+  } else {
+    tableCard.classList.remove('hidden');
+    pipeline.classList.add('hidden');
+    loadProjects();
+  }
+}
+
+async function loadPipeline() {
+  try {
+    const data = await API.get('/api/projects?limit=200');
+    if (!data) return;
+    const COLS = [
+      { key:'planning',    label:'Planlama',    color:'var(--blue)' },
+      { key:'in_progress', label:'Devam Ediyor', color:'var(--amber)' },
+      { key:'review',      label:'İnceleme',    color:'var(--accent)' },
+      { key:'completed',   label:'Tamamlandı',  color:'var(--accent)' },
+      { key:'paused',      label:'Duraklatıldı',color:'var(--muted)' },
+      { key:'cancelled',   label:'İptal',       color:'var(--red)' },
+    ];
+    const grouped = {};
+    COLS.forEach(c => grouped[c.key] = []);
+    data.data.forEach(p => { if (grouped[p.status]) grouped[p.status].push(p); });
+
+    document.getElementById('kanban-board-inner').innerHTML = COLS.map(col => `
+      <div class="kanban-col">
+        <div class="kanban-col-header">
+          <span class="kanban-col-title" style="color:${col.color}">${col.label}</span>
+          <span class="kanban-col-count">${grouped[col.key].length}</span>
+        </div>
+        <div class="kanban-cards">
+          ${grouped[col.key].length
+            ? grouped[col.key].map(p => `
+              <div class="kanban-card" onclick="openProjectModal('${encodeURIComponent(JSON.stringify(p))}')">
+                <div class="kanban-card-title">${escHtml(p.title)}</div>
+                <div class="kanban-card-meta">
+                  ${p.client_name ? `<span>👤 ${escHtml(p.client_name)}</span>` : ''}
+                  ${p.deadline    ? `<span>📅 ${fmt(p.deadline)}</span>` : ''}
+                  <span>${badge(PRIORITY_LABELS[p.priority]||p.priority, PRIORITY_BADGE[p.priority]||'gray')}</span>
+                </div>
+              </div>`).join('')
+            : `<div style="padding:12px;text-align:center;font-size:12px;color:var(--muted)">Boş</div>`}
+        </div>
+      </div>
+    `).join('');
+  } catch (err) { toast(err.message,'error'); }
+}
+
+// ─── PROPOSALS ───────────────────────────────────────────────────────────────
+document.getElementById('btn-add-proposal').onclick = () => openProposalModal();
+
+let propSearchTimer;
+document.getElementById('proposal-search').oninput = e => {
+  clearTimeout(propSearchTimer);
+  propSearchTimer = setTimeout(() => { State.proposals.search = e.target.value; State.proposals.page = 1; loadProposals(); }, 300);
+};
+document.getElementById('proposal-status-filter').onchange = e => { State.proposals.status = e.target.value; State.proposals.page = 1; loadProposals(); };
+
+const PROP_STATUS = { draft:'Taslak', sent:'Gönderildi', viewed:'Görüntülendi', accepted:'Kabul Edildi', rejected:'Reddedildi' };
+const PROP_BADGE  = { draft:'gray', sent:'blue', viewed:'amber', accepted:'green', rejected:'red' };
+
+async function loadProposals() {
+  const { page, limit, search, status } = State.proposals;
+  const qs = new URLSearchParams({ page, limit, search, status }).toString();
+  try {
+    const data = await API.get(`/api/proposals?${qs}`);
+    if (!data) return;
+    State.proposals.total = data.total;
+    document.getElementById('proposals-tbody').innerHTML = data.data.length
+      ? data.data.map(p => `<tr>
+          <td style="font-weight:500">${escHtml(p.title)}</td>
+          <td style="color:var(--muted2)">${escHtml(p.client_name||'—')}</td>
+          <td style="color:var(--accent)">${p.amount ? '₺' + Number(p.amount).toLocaleString('tr-TR') : '—'}</td>
+          <td>${badge(PROP_STATUS[p.status]||p.status, PROP_BADGE[p.status]||'gray')}</td>
+          <td style="color:var(--muted)">${fmt(p.valid_until)}</td>
+          <td style="color:var(--muted)">${fmt(p.created_at)}</td>
+          <td><div class="actions">
+            <button class="btn btn-ghost btn-sm btn-icon editor-action" onclick="openProposalModal(${JSON.stringify(escHtml(JSON.stringify(p))).replace(/"/g,'&quot;')})" title="Düzenle">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-sm btn-icon admin-only" onclick="deleteProposal(${p.id},'${escHtml(p.title)}')" title="Sil">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div></td>
+        </tr>`).join('')
+      : '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Teklif bulunamadı</div></div></td></tr>';
+    document.getElementById('proposals-info').textContent = `${data.total} teklif`;
+    applyRoleVisibility(State.user?.role);
+    renderPagination('proposals-pagination', page, data.total, limit, p => { State.proposals.page=p; loadProposals(); });
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function openProposalModal(propJson) {
+  const p = propJson ? JSON.parse(decodeURIComponent(propJson)) : null;
+  const clientsData = await API.get('/api/clients?limit=200');
+  const projectsData = await API.get('/api/projects?limit=200');
+  const clientOpts  = (clientsData?.data||[]).map(c=>`<option value="${c.id}" ${p?.client_id==c.id?'selected':''}>${escHtml(c.name)}</option>`).join('');
+  const projectOpts = (projectsData?.data||[]).map(r=>`<option value="${r.id}" ${p?.project_id==r.id?'selected':''}>${escHtml(r.title)}</option>`).join('');
+
+  Modal.open(p ? 'Teklifi Düzenle' : 'Yeni Teklif', `
+    <form id="proposal-form">
+      <div class="form-group"><label>Başlık *</label><input name="title" value="${escHtml(p?.title||'')}" required placeholder="Web sitesi yenileme teklifi"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Müşteri</label><select name="client_id"><option value="">— Seçin —</option>${clientOpts}</select></div>
+        <div class="form-group"><label>Proje (opsiyonel)</label><select name="project_id"><option value="">— Seçin —</option>${projectOpts}</select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tutar (₺)</label><input name="amount" type="number" value="${p?.amount||''}" placeholder="0"></div>
+        <div class="form-group"><label>Geçerlilik Tarihi</label><input name="valid_until" type="date" value="${p?.valid_until?p.valid_until.split('T')[0]:''}"></div>
+      </div>
+      <div class="form-group"><label>Durum</label>
+        <select name="status">
+          ${Object.entries(PROP_STATUS).map(([k,v])=>`<option value="${k}" ${(p?.status||'draft')===k?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group"><label>Açıklama</label><textarea name="description">${escHtml(p?.description||'')}</textarea></div>
+      <div class="form-group"><label>İç Notlar</label><textarea name="notes" style="min-height:60px">${escHtml(p?.notes||'')}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-primary" onclick="submitProposalForm(${p?.id||'null'})">Kaydet</button>
+  `);
+}
+
+async function submitProposalForm(id) {
+  const fd = new FormData(document.getElementById('proposal-form'));
+  const body = Object.fromEntries(fd.entries());
+  try {
+    if (id) await API.put(`/api/proposals/${id}`, body);
+    else     await API.post('/api/proposals', body);
+    Modal.close(); toast(id ? 'Teklif güncellendi' : 'Teklif eklendi'); loadProposals();
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function deleteProposal(id, title) {
+  Modal.open('Teklifi Sil', `<p class="confirm-text"><span class="confirm-name">${escHtml(title)}</span> teklifini silmek istediğinize emin misiniz?</p>`, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-danger" onclick="(async()=>{try{await API.delete('/api/proposals/${id}');Modal.close();toast('Teklif silindi');loadProposals();}catch(e){toast(e.message,'error');}})()">Sil</button>
+  `);
+}
+
+// ─── PAYMENTS ────────────────────────────────────────────────────────────────
+document.getElementById('btn-add-payment').onclick = () => openPaymentModal();
+document.getElementById('payment-status-filter').onchange = e => { State.payments.status = e.target.value; State.payments.page = 1; loadPayments(); };
+
+const PAY_STATUS = { pending:'Bekliyor', paid:'Ödendi', overdue:'Gecikti', cancelled:'İptal' };
+const PAY_BADGE  = { pending:'amber', paid:'green', overdue:'red', cancelled:'gray' };
+
+async function loadPayments() {
+  const { page=1, limit=20, status } = State.payments;
+  const qs = new URLSearchParams({ page, limit, status }).toString();
+  try {
+    const data = await API.get(`/api/payments?${qs}`);
+    if (!data) return;
+    State.payments.total = data.total;
+
+    const s = data.summary;
+    const fmt2 = v => v ? '₺' + Number(v).toLocaleString('tr-TR',{minimumFractionDigits:0}) : '₺0';
+    document.getElementById('pay-kpi-grid').innerHTML = `
+      <div class="kpi-card amber"><div class="kpi-label">Bekleyen</div><div class="kpi-value" style="font-size:22px">${fmt2(s.pending_total)}</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Tahsil Edilen</div><div class="kpi-value" style="font-size:22px">${fmt2(s.paid_total)}</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Geciken</div><div class="kpi-value" style="font-size:22px">${fmt2(s.overdue_total)}</div></div>
+    `;
+
+    document.getElementById('payments-tbody').innerHTML = data.data.length
+      ? data.data.map(p => `<tr>
+          <td style="font-weight:500">${escHtml(p.title)}</td>
+          <td style="color:var(--muted2)">${escHtml(p.client_name||'—')}</td>
+          <td style="color:var(--muted2)">${escHtml(p.project_title||'—')}</td>
+          <td style="color:var(--accent)">₺${Number(p.amount).toLocaleString('tr-TR')}</td>
+          <td>${badge(PAY_STATUS[p.status]||p.status, PAY_BADGE[p.status]||'gray')}</td>
+          <td style="color:${p.status==='overdue'?'var(--red)':'var(--muted)'}">${fmt(p.due_date)}</td>
+          <td style="color:var(--muted2);font-size:12px">${escHtml(p.invoice_no||'—')}</td>
+          <td><div class="actions">
+            <button class="btn btn-ghost btn-sm btn-icon editor-action" onclick="openPaymentModal(${JSON.stringify(escHtml(JSON.stringify(p))).replace(/"/g,'&quot;')})" title="Düzenle">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-sm btn-icon admin-only" onclick="deletePayment(${p.id},'${escHtml(p.title)}')" title="Sil">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div></td>
+        </tr>`).join('')
+      : '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💳</div><div class="empty-title">Ödeme bulunamadı</div></div></td></tr>';
+
+    document.getElementById('payments-info').textContent = `${data.total} ödeme`;
+    applyRoleVisibility(State.user?.role);
+    renderPagination('payments-pagination', page, data.total, limit, p => { State.payments.page=p; loadPayments(); });
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function openPaymentModal(payJson) {
+  const p = payJson ? JSON.parse(decodeURIComponent(payJson)) : null;
+  const [clientsData, projectsData] = await Promise.all([
+    API.get('/api/clients?limit=200'),
+    API.get('/api/projects?limit=200'),
+  ]);
+  const clientOpts  = (clientsData?.data||[]).map(c=>`<option value="${c.id}" ${p?.client_id==c.id?'selected':''}>${escHtml(c.name)}</option>`).join('');
+  const projectOpts = (projectsData?.data||[]).map(r=>`<option value="${r.id}" ${p?.project_id==r.id?'selected':''}>${escHtml(r.title)}</option>`).join('');
+
+  Modal.open(p ? 'Ödemeyi Düzenle' : 'Yeni Ödeme', `
+    <form id="payment-form">
+      <div class="form-group"><label>Başlık *</label><input name="title" value="${escHtml(p?.title||'')}" required placeholder="Proje 1. aşama ödemesi"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Müşteri</label><select name="client_id"><option value="">— Seçin —</option>${clientOpts}</select></div>
+        <div class="form-group"><label>Proje</label><select name="project_id"><option value="">— Seçin —</option>${projectOpts}</select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tutar (₺) *</label><input name="amount" type="number" value="${p?.amount||''}" required placeholder="0"></div>
+        <div class="form-group"><label>Son Ödeme Tarihi</label><input name="due_date" type="date" value="${p?.due_date?p.due_date.split('T')[0]:''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Durum</label>
+          <select name="status">
+            ${Object.entries(PAY_STATUS).map(([k,v])=>`<option value="${k}" ${(p?.status||'pending')===k?'selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><label>Fatura No</label><input name="invoice_no" value="${escHtml(p?.invoice_no||'')}" placeholder="FTR-2024-001"></div>
+      </div>
+      <div class="form-group"><label>Not</label><textarea name="notes" style="min-height:60px">${escHtml(p?.notes||'')}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-primary" onclick="submitPaymentForm(${p?.id||'null'})">Kaydet</button>
+  `);
+}
+
+async function submitPaymentForm(id) {
+  const fd = new FormData(document.getElementById('payment-form'));
+  const body = Object.fromEntries(fd.entries());
+  try {
+    if (id) await API.put(`/api/payments/${id}`, body);
+    else     await API.post('/api/payments', body);
+    Modal.close(); toast(id ? 'Ödeme güncellendi' : 'Ödeme eklendi'); loadPayments();
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function deletePayment(id, title) {
+  Modal.open('Ödemeyi Sil', `<p class="confirm-text"><span class="confirm-name">${escHtml(title)}</span> ödemesini silmek istediğinize emin misiniz?</p>`, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    <button class="btn btn-danger" onclick="(async()=>{try{await API.delete('/api/payments/${id}');Modal.close();toast('Ödeme silindi');loadPayments();}catch(e){toast(e.message,'error');}})()">Sil</button>
+  `);
+}
+
+// ─── TASKS ───────────────────────────────────────────────────────────────────
+document.getElementById('btn-add-task').onclick = () => openTaskModal();
+document.getElementById('task-project-filter').onchange = e => { State.tasks.project_id = e.target.value; loadTasks(); };
+
+const TASK_STATUS = { todo:'Yapılacak', in_progress:'Devam Ediyor', review:'İncelemede', done:'Tamamlandı' };
+const TASK_BADGE  = { todo:'gray', in_progress:'amber', review:'blue', done:'green' };
+
+async function loadTasks() {
+  try {
+    const projectsData = await API.get('/api/projects?limit=200');
+    const projects = projectsData?.data || [];
+
+    // populate project filter
+    const sel = document.getElementById('task-project-filter');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Tüm Projeler</option>' +
+      projects.map(p => `<option value="${p.id}" ${cur==p.id?'selected':''}>${escHtml(p.title)}</option>`).join('');
+    sel.value = cur;
+
+    const qs = new URLSearchParams({ project_id: State.tasks.project_id }).toString();
+    const tasks = await API.get(`/api/tasks?${qs}`);
+    if (!tasks) return;
+
+    const grouped = { todo:[], in_progress:[], review:[], done:[] };
+    tasks.forEach(t => { if (grouped[t.status]) grouped[t.status].push(t); });
+
+    document.getElementById('task-board').innerHTML = Object.entries(TASK_STATUS).map(([key, label]) => `
+      <div class="task-col">
+        <div class="task-col-header">
+          <span style="color:${key==='done'?'var(--accent)':key==='in_progress'?'var(--amber)':key==='review'?'var(--blue)':'var(--muted2)'}">${label}</span>
+          <span style="font-size:11px;color:var(--muted);font-weight:400">${grouped[key].length}</span>
+        </div>
+        <div class="task-col-body">
+          ${grouped[key].length
+            ? grouped[key].map(t => `
+              <div class="task-item" onclick="openTaskModal('${encodeURIComponent(JSON.stringify(t))}')">
+                <div class="task-title">${escHtml(t.title)}</div>
+                <div class="task-detail">
+                  ${t.project_title ? `<span>📁 ${escHtml(t.project_title)}</span>` : ''}
+                  ${badge(PRIORITY_LABELS[t.priority]||t.priority, PRIORITY_BADGE[t.priority]||'gray')}
+                  ${t.due_date ? `<span>📅 ${fmt(t.due_date)}</span>` : ''}
+                </div>
+              </div>`).join('')
+            : `<div style="padding:12px;text-align:center;font-size:12px;color:var(--muted)">—</div>`}
+        </div>
+      </div>
+    `).join('');
+    applyRoleVisibility(State.user?.role);
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function openTaskModal(taskJson) {
+  const t = taskJson ? JSON.parse(decodeURIComponent(taskJson)) : null;
+  const [projectsData, usersData] = await Promise.all([
+    API.get('/api/projects?limit=200'),
+    State.user?.role !== 'viewer' ? API.get('/api/users') : Promise.resolve([]),
+  ]);
+  const projectOpts = (projectsData?.data||[]).map(p=>`<option value="${p.id}" ${t?.project_id==p.id?'selected':''}>${escHtml(p.title)}</option>`).join('');
+  const userOpts    = (usersData||[]).map(u=>`<option value="${u.id}" ${t?.assigned_to==u.id?'selected':''}>${escHtml(u.name)}</option>`).join('');
+
+  Modal.open(t ? 'Görevi Düzenle' : 'Yeni Görev', `
+    <form id="task-form">
+      <div class="form-group"><label>Başlık *</label><input name="title" value="${escHtml(t?.title||'')}" required placeholder="Görev başlığı"></div>
+      <div class="form-group"><label>Proje *</label><select name="project_id" required><option value="">— Proje Seçin —</option>${projectOpts}</select></div>
+      <div class="form-row">
+        <div class="form-group"><label>Durum</label>
+          <select name="status">
+            ${Object.entries(TASK_STATUS).map(([k,v])=>`<option value="${k}" ${(t?.status||'todo')===k?'selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><label>Öncelik</label>
+          <select name="priority">
+            ${['urgent','high','medium','low'].map(s=>`<option value="${s}" ${(t?.priority||'medium')===s?'selected':''}>${PRIORITY_LABELS[s]}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        ${userOpts ? `<div class="form-group"><label>Atanan</label><select name="assigned_to"><option value="">— Seçin —</option>${userOpts}</select></div>` : '<div></div>'}
+        <div class="form-group"><label>Son Tarih</label><input name="due_date" type="date" value="${t?.due_date?t.due_date.split('T')[0]:''}"></div>
+      </div>
+      <div class="form-group"><label>Açıklama</label><textarea name="description">${escHtml(t?.description||'')}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-ghost" onclick="Modal.close()">İptal</button>
+    ${t ? `<button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">Sil</button>` : ''}
+    <button class="btn btn-primary" onclick="submitTaskForm(${t?.id||'null'})">Kaydet</button>
+  `);
+}
+
+async function submitTaskForm(id) {
+  const fd = new FormData(document.getElementById('task-form'));
+  const body = Object.fromEntries(fd.entries());
+  try {
+    if (id) await API.put(`/api/tasks/${id}`, body);
+    else     await API.post('/api/tasks', body);
+    Modal.close(); toast(id ? 'Görev güncellendi' : 'Görev eklendi'); loadTasks();
+  } catch (err) { toast(err.message,'error'); }
+}
+
+async function deleteTask(id) {
+  try { await API.delete(`/api/tasks/${id}`); Modal.close(); toast('Görev silindi'); loadTasks(); }
+  catch (err) { toast(err.message,'error'); }
+}
+
+// ─── START ────────────────────────────────────────────────────────────────────
+init();
+const h = location.hash.replace('#','');
+</script>
+</body>
+</html>

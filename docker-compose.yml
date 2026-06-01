@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: supervisor_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-supervisor}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-SupervisorPass2024!}
+      POSTGRES_DB: ${DB_NAME:-supervisor_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - supervisor_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-supervisor} -d ${DB_NAME:-supervisor_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: supervisor_app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-supervisor}
+      DB_PASSWORD: ${DB_PASSWORD:-SupervisorPass2024!}
+      DB_NAME: ${DB_NAME:-supervisor_db}
+      JWT_SECRET: ${JWT_SECRET:-gizli-jwt-anahtari-uretimde-degistirin-uzun-rastgele-deger}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@supervisor.io}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin1234!}
+      ADMIN_NAME: ${ADMIN_NAME:-Süpervizör Admin}
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - supervisor_net
+
+networks:
+  supervisor_net:
+    driver: bridge
+
+volumes:
+  postgres_data:

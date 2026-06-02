@@ -272,6 +272,9 @@ async function ensureAdmin() {
 
 // ─── Başlat ───────────────────────────────────────────────────────────────────
 async function start() {
+  console.log('DATABASE_URL:', process.env.DATABASE_URL ? `SET (${process.env.DATABASE_URL.split('@')[1] || 'parsed'})` : 'NOT SET');
+  console.log('PGHOST:', process.env.PGHOST || 'NOT SET');
+
   let retries = 10;
   while (retries > 0) {
     try {
@@ -280,7 +283,7 @@ async function start() {
       break;
     } catch (err) {
       retries--;
-      console.log(`⏳ Veritabanı bekleniyor... (${retries} deneme kaldı)`);
+      console.error(`⏳ Veritabanı bekleniyor... (${retries} deneme kaldı) — Hata: ${err.message}`);
       await new Promise(r => setTimeout(r, 3000));
     }
   }

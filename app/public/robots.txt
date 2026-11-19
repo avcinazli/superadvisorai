@@ -1,0 +1,29 @@
+# superadvisor-ai.com
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# AI arama ve yanıt motorları — açıkça izinli
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://superadvisor-ai.com/sitemap.xml

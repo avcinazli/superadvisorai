@@ -94,9 +94,14 @@ app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Endpoint bulunamadı' });
 });
 
-// Catch-all: landing page
+// Temiz URL'ler (Vercel'de CDN cleanUrls ile karşılar; burası yerel/yedek)
+app.get('/:page(fiyatlar|yapay-zeka-danismanligi|kurumsal-yapay-zeka-egitimi)', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', `${req.params.page}.html`));
+});
+
+// Bilinmeyen yollar: 404 (SEO için 200 dönmüyoruz)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+  res.status(404).sendFile(path.join(__dirname, 'public', 'landing.html'));
 });
 
 // ─── Veritabanı Schema & Seed ─────────────────────────────────────────────────
@@ -263,6 +268,15 @@ async function ensureAdmin() {
         [email, name, hash, 'admin']
       );
       console.log(`✅ Admin hesabı oluşturuldu: ${email}`);
+    } else if (process.env.ADMIN_NEW_PASSWORD) {
+      // Şifre kurtarma: Vercel'e ADMIN_NEW_PASSWORD=<yeni şifre> ekleyin,
+      // giriş yaptıktan sonra bu değişkeni SİLİN (yoksa her açılışta şifre buna döner).
+      const hash = await bcrypt.hash(process.env.ADMIN_NEW_PASSWORD, 12);
+      await pool.query(
+        'UPDATE users SET password_hash = $1, is_active = true WHERE id = $2',
+        [hash, rows[0].id]
+      );
+      console.log(`🔑 Admin şifresi ADMIN_NEW_PASSWORD ile sıfırlandı: ${email}`);
     } else {
       console.log(`ℹ️  Admin hesabı zaten mevcut: ${email}`);
     }
@@ -304,4 +318,15 @@ async function start() {
   });
 }
 
-start();
+// Serverless (Vercel) için: listen yok, şema + admin kontrolü soğuk başlangıçta bir kez
+async function init() {
+  await pool.query('SELECT 1');
+  await runMigrations();
+  await ensureAdmin();
+}
+
+if (require.main === module) {
+  start();
+}
+
+module.exports = { app, init };

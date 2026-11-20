@@ -1,12 +1,12 @@
 # superadvisor-ai
 
-> superadvisor-ai, İstanbul merkezli, Türkiye genelinde işletmelere yapay zeka stratejisi, model entegrasyonu (GPT-4o, Claude, Gemini), veri altyapısı, kurumsal YZ eğitimi ve AB Yapay Zeka Yasası uyumu sunan bir yapay zeka danışmanlık firmasıdır. 2019'dan bu yana 200+ proje; finans, sağlık, lojistik, enerji, perakende ve tarım dahil 12 sektör.
+> superadvisor-ai, İstanbul merkezli, Türkiye genelinde işletmelere yapay zeka stratejisi, model entegrasyonu (GPT-4o, Claude, Gemini), veri altyapısı, kurumsal YZ eğitimi ve AB Yapay Zeka Yasası uyumu sunan bir yapay zeka danışmanlık firmasıdır. Odak sektörler: perakende ve e-ticaret, lojistik, sağlık ve KOBİ'ler.
 
 Önemli bilgiler:
 
 - Süreç: ücretsiz 30 dk keşif görüşmesi → 72 saatte yazılı yol haritası ve teklif → sprint geliştirme (6–8 haftada pilot) → canlıya alım ve 3 ay destek; ölçeklendirme 90 günlük planla
 - Fiyatlar (aylık retainer): Başlangıç ₺24.900 · Büyüme ₺59.900 · Kurumsal ₺119.900 (yıllık ödemede ₺19.900 · ₺47.900 · ₺95.900/ay)
-- Altyapı: AWS, GCP, Azure, on-premise · dbt, Airflow, Snowflake · ISO 27001 uyumlu entegrasyon · her projede NDA ve DPA
+- Altyapı: AWS, GCP, Azure, on-premise · dbt, Airflow, Snowflake · her projede NDA, yazılı KVKK ve AB YZ Yasası risk analizi; müşteri verisi model eğitiminde kullanılmaz; istenirse on-premise kurulum
 - Eğitim: yerinde, online veya hibrit; tüm paketlere dahil
 - İletişim: info@superadvisor-ai.com · +90 541 139 47 67 (WhatsApp)
 
@@ -22,4 +22,4 @@
 
 ## Optional
 
-- [Ana sayfa](https://superadvisor-ai.com/): hizmetler, entegrasyonlar, süreç ve referanslar
+- [Ana sayfa](https://superadvisor-ai.com/): hizmetler, entegrasyonlar, süreç, sektörel çözümler ve KVKK/veri güvenliği

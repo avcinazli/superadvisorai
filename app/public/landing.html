@@ -793,6 +793,27 @@
     .price-btn.solid { background: var(--purple); color: #0b0f17; }
     .price-btn.solid:hover { background: var(--purple-lt); }
 
+    /* ─── ÜRÜNLERİMİZ ───────────────────────── */
+    .products { padding: 110px 0; position: relative; }
+    .product-card {
+      display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: center;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 28px;
+    }
+    .product-video {
+      width: 100%; border-radius: 16px; background: #000; display: block;
+      max-height: 70vh; object-fit: contain;
+    }
+    .product-info h3 { font-size: clamp(22px, 2.6vw, 30px); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 14px; }
+    .product-info p { font-size: 15px; color: var(--muted-lt); line-height: 1.7; }
+    .product-info ul { list-style: none; margin-top: 16px; display: grid; gap: 8px; }
+    .product-info li { font-size: 14px; color: var(--muted-lt); padding-left: 18px; position: relative; line-height: 1.5; }
+    .product-info li::before { content: '◆'; position: absolute; left: 0; color: var(--purple-lt); font-size: 9px; top: 5px; }
+    .product-info .btn-primary { margin-top: 24px; width: fit-content; }
+    @media (max-width: 900px) {
+      .products { padding: 80px 0; }
+      .product-card { grid-template-columns: 1fr; gap: 24px; padding: 16px; }
+    }
+
     /* ─── SEKTÖRLER & KVKK ──────────────────── */
     .sectors { padding: 110px 0; position: relative; }
     .sectors + .sectors { padding-top: 20px; }
@@ -1003,6 +1024,7 @@
         <li><a href="#hizmetler">Hizmetler</a></li>
         <li><a href="#entegrasyon">Entegrasyon</a></li>
         <li><a href="#surec">Süreç</a></li>
+        <li><a href="#urunler">Ürünlerimiz</a></li>
         <li><a href="#fiyatlar">Fiyatlar</a></li>
         <li><a href="#sektorler">Sektörler</a></li>
         <li><a href="#sss">SSS</a></li>
@@ -1025,6 +1047,7 @@
     <a href="#hizmetler">Hizmetler</a>
     <a href="#entegrasyon">Entegrasyon</a>
     <a href="#surec">Süreç</a>
+    <a href="#urunler">Ürünlerimiz</a>
     <a href="#fiyatlar">Fiyatlar</a>
     <a href="#sektorler">Sektörler</a>
     <a href="#sss">SSS</a>
@@ -1552,6 +1575,33 @@
           }
         }
       </style>
+    </div>
+  </section>
+
+  <!-- ÜRÜNLERİMİZ -->
+  <section class="products" id="urunler">
+    <div class="container">
+      <div class="sec-header">
+        <div class="pill-badge reveal" style="margin:0 auto 20px">Ürünlerimiz</div>
+        <h2 class="reveal reveal-delay-1">Yapay Zeka ile<br/><span class="grad-text">UGC Video Üretin</span></h2>
+        <p class="reveal reveal-delay-2">Danışmanlık projelerimizin yanında doğrudan kullanılabilen yapay zeka ürünleri geliştiriyoruz.</p>
+      </div>
+      <article class="product-card reveal">
+        <video class="product-video" controls playsinline muted loop preload="metadata" aria-label="SuperAdvisor UGC video üretimi tanıtım videosu">
+          <source src="/assets/video/superadvisor-foto-reklam.mp4" type="video/mp4" />
+          Tarayıcınız video oynatmayı desteklemiyor.
+        </video>
+        <div class="product-info">
+          <h3>SuperAdvisor UGC Video Üretici</h3>
+          <p>Ürün fotoğrafınızdan yapay zeka ile UGC (kullanıcı tarafından üretilmiş içerik) tarzında reklam videoları üretin. Çekim, oyuncu ya da stüdyo gerekmez.</p>
+          <ul>
+            <li>Tek bir ürün fotoğrafından reklam videosu</li>
+            <li>Sosyal medya için dikey formatlar</li>
+            <li>E-ticaret ve marka kampanyaları için hızlı üretim</li>
+          </ul>
+          <a href="#iletisim" class="btn-primary">Demo Talep Edin</a>
+        </div>
+      </article>
     </div>
   </section>
 
